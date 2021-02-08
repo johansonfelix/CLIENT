@@ -94,9 +94,11 @@ public class Main {
                 input.setContentType(contentType);
                 if(request instanceof HttpPost){
                     ((HttpPost) request).setEntity(input);
+                    System.out.println("Is a post request");
                 }
                 else if(request instanceof HttpPut){
                     ((HttpPut) request).setEntity(input);
+                    System.out.println("Is a put request");
                 }
             }
             try {
@@ -197,16 +199,16 @@ public class Main {
         int choice = loopMenu(choices, 1, 6);
         switch(choice){
             case 1:
-                promptUpdateSingleAlbumAttribute(ISRC, "Title");
+                promptUpdateSingleAlbumAttribute(ISRC, "title");
                 break;
             case 2:
-                promptUpdateSingleAlbumAttribute(ISRC, "Description");
+                promptUpdateSingleAlbumAttribute(ISRC, "description");
                 break;
             case 3:
-                promptUpdateSingleAlbumAttribute(ISRC, "Release year");
+                promptUpdateSingleAlbumAttribute(ISRC, "releaseYear");
                 break;
             case 4:
-                promptUpdateSingleAlbumAttribute(ISRC, "Artist nickname");
+                promptUpdateSingleAlbumAttribute(ISRC, "artistNickname");
                 break;
             case 5:
                 promptUpdateAllAlbumAttributes(ISRC);
