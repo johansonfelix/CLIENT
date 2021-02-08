@@ -19,7 +19,6 @@ public class MyResourceTest {
     @Before
     public void setUp() throws Exception {
         // start the server
-        server = Main.startServer();
         // create the client
         Client c = ClientBuilder.newClient();
 
@@ -29,7 +28,6 @@ public class MyResourceTest {
         // --
         // c.configuration().enable(new org.glassfish.jersey.media.json.JsonJaxbFeature());
 
-        target = c.target(Main.BASE_URI);
     }
 
     @After

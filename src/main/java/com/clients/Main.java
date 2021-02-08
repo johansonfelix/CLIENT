@@ -6,40 +6,195 @@ import org.glassfish.jersey.server.ResourceConfig;
 
 import java.io.IOException;
 import java.net.URI;
+import java.util.Scanner;
 
 /**
  * Main class.
  *
  */
 public class Main {
-    // Base URI the Grizzly HTTP server will listen on
-    public static final String BASE_URI = "http://localhost:8080/myapp/";
 
-    /**
-     * Starts Grizzly HTTP server exposing JAX-RS resources defined in this application.
-     * @return Grizzly HTTP server.
-     */
-    public static HttpServer startServer() {
-        // create a resource config that scans for JAX-RS resources and providers
-        // in com.clients package
-        final ResourceConfig rc = new ResourceConfig().packages("com.clients");
 
-        // create and start a new instance of grizzly http server
-        // exposing the Jersey application at BASE_URI
-        return GrizzlyHttpServerFactory.createHttpServer(URI.create(BASE_URI), rc);
+    private static void printWelcomeMessage(){
+        System.out.println("Welcome to the A1 RESTful web service.");
+    }
+    private static int loopMenu(String choices, int lowerValue, int upperValue){
+        int choice = -1;
+        while(true){
+            System.out.println(choices);
+            Scanner scan = new Scanner(System.in);
+             choice = scan.nextInt();
+            if(choice >=  lowerValue && choice <= upperValue){
+                break;
+            }
+            else{
+                System.out.println("Invalid input. Please enter a number between " + lowerValue + " and " + upperValue);
+            }
+        }
+        return choice;
+    }
+    private static void mainMenu(){
+
+        Scanner scan = new Scanner(System.in);
+        String choices =
+                "[MAIN MENU]\nWhat would you like to manage?\n"+
+                        "\t 1. Albums\n"+
+                        "\t 2. Artists\n"+
+                        "\t 3. EXIT";
+        int choice = loopMenu(choices, 1,3);
+        switch(choice){
+            case 1:
+                manageAlbumsMenu();
+                break;
+            case 2:
+                manageArtistsMenu();
+                break;
+            case 3:
+            {
+                System.out.println("Goodbye!");
+                System.exit(0);
+            }
+            break;
+        }
     }
 
+    private static void promptGetAlbumDetails(){
+        System.out.println("[GET ALBUM DETAILS]\n Please enter the ISRC of the album you want to get details for:");
+        Scanner scan = new Scanner(System.in);
+        String ISRC = scan.nextLine();
+        /*
+        Use ISRC input to get the album details, send HTTP request.
+         */
+        manageAlbumsMenu();
+    }
+    private static String promptUpdateSingleAlbumAttribute(String ISRC, String attribute){
+        String result = null;
+        String newValue = getInputFor(attribute);
+        /*
+        API call, get the string
+         */
+        return result;
+    }
+    private static String promptUpdateAllAlbumAttributes(String ISRC){
+        String result = null;
+        String newTitle = getInputFor("Title");
+        String newDescription = getInputFor("Description");
+        String newReleaseYear = getInputFor("Release year");
+        String newArtistNickname = getInputFor("Artist nickname");
+        /*
+        API call, get the string.
+         */
+        return result;
+    }
+    private static void promptUpdateAlbum(){
+        System.out.println("[UPDATE ALBUM]\n Please enter the ISRC of the album you want to update.");
+        Scanner scan = new Scanner(System.in);
+        String ISRC = scan.nextLine();
+        String choices = "";
+        choices += ("Which attribute do you want to update?");
+        choices += ("\t 1. Title\n");
+        choices += ("\t 2. Description\n");
+        choices += ("\t 3. Release year\n");
+        choices += ("\t 4. Artist (Nickname)\n");
+        choices += ("\t 5. All attributes\n");
+        choices += ("\t 6. ↵ ALBUMS menu");
+        int choice = loopMenu(choices, 1, 6);
+        switch(choice){
+            case 1:
+                promptUpdateSingleAlbumAttribute(ISRC, "Title");
+                break;
+            case 2:
+                promptUpdateSingleAlbumAttribute(ISRC, "Description");
+                break;
+            case 3:
+                promptUpdateSingleAlbumAttribute(ISRC, "Release year");
+                break;
+            case 4:
+                promptUpdateSingleAlbumAttribute(ISRC, "Artist nickname");
+                break;
+            case 5:
+                promptUpdateAllAlbumAttributes(ISRC);
+                break;
+            case 6:
+                manageAlbumsMenu();
+                break;
+        }
+    }
+    private static String getInputFor(String thing){
+        Scanner scan = new Scanner(System.in);
+        System.out.println("Enter " + thing + "> ");
+        return scan.nextLine();
+    }
+    private static void listAlbums(){
+        /*
+        API call to list all albums.
+         */
+    }
+    private static void promptDeleteAlbum(){
+        String ISRC = getInputFor("ISRC");
+        /*
+        API call to delete the album.
+         */
+    }
+    private static void promptAddAlbum(){
+        String ISRC = getInputFor("ISRC");
+        String title = getInputFor("Title");
+        String description = getInputFor("Description");
+        String releaseYear = getInputFor("Release year");
+        String artistNickname = getInputFor("Artist nickname");
+        /*
+        API call to add an album.
+         */
+    }
+    private static void manageAlbumsMenu(){
+
+        String choices = "";
+        choices+=("[ALBUMS]\n Select an option below:\n");
+        choices+=("\t 1. Add album\n");
+        choices+=("\t 2. Delete album\n");
+        choices+=("\t 3. List all albums\n");
+        choices+=("\t 4. Update an album\n");
+        choices+=("\t 5. Get album details\n");
+        choices+=("\t 6. ↵ Main menu\n");
+        int choice = loopMenu(choices, 1,6);
+        switch (choice) {
+            case 1:
+                promptAddAlbum();
+                manageAlbumsMenu();
+                break;
+            case 2:
+                promptDeleteAlbum();
+                manageAlbumsMenu();
+                break;
+            case 3:
+                listAlbums();
+                manageAlbumsMenu();
+                break;
+            case 4:
+                promptUpdateAlbum();
+                manageAlbumsMenu();
+                break;
+            case 5:
+                promptGetAlbumDetails();
+                manageAlbumsMenu();
+                break;
+            case 6:
+                mainMenu();
+                break;
+        }
+    }
+    private static void manageArtistsMenu(){
+        String choices = "";
+        choices += ("[ARTISTS] ");
+    }
     /**
      * Main method.
      * @param args
      * @throws IOException
      */
     public static void main(String[] args) throws IOException {
-        final HttpServer server = startServer();
-        System.out.println(String.format("Jersey app started with WADL available at "
-                + "%sapplication.wadl\nHit enter to stop it...", BASE_URI));
-        System.in.read();
-        server.stop();
+        printWelcomeMessage();
+        mainMenu();
     }
 }
 
