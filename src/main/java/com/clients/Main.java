@@ -71,7 +71,7 @@ public class Main {
         String result = null;
         String newValue = getInputFor(attribute);
         /*
-        API call, get the string
+        API call, get the string. Use a switch statement to determine which attribute to change.
          */
         return result;
     }
@@ -88,8 +88,7 @@ public class Main {
     }
     private static void promptUpdateAlbum(){
         System.out.println("[UPDATE ALBUM]\n Please enter the ISRC of the album you want to update.");
-        Scanner scan = new Scanner(System.in);
-        String ISRC = scan.nextLine();
+        String ISRC = getInputFor("ISRC");
         String choices = "";
         choices += ("Which attribute do you want to update?");
         choices += ("\t 1. Title\n");
@@ -183,9 +182,112 @@ public class Main {
                 break;
         }
     }
+    private static void promptAddArtist(){
+        String nickname = getInputFor("Artist nickname");
+        String firstName = getInputFor("Artist first name");
+        String lastName = getInputFor("Artist last name");
+        String bio = getInputFor("Artist bio");
+        /*
+        API CALL FOR ADD ARTIST
+         */
+    }
+    private static void promptDeleteArtist(){
+        String nickname = getInputFor("nickname of artist to delete");
+        /*
+        API CALL FOR DELETE ARTIST
+         */
+    }
+    private static void listAllArtists(){
+        /*
+        API CALL FOR LIST ALL ARTISTS
+         */
+    }
+    private static void promptUpdateSingleArtistAttribute(String nickname, String attribute){
+        String newValue = getInputFor("new " + attribute.toLowerCase());
+        /*
+        API CALL FOR UPDATING A SINGLE ATTRIBUTE func(nickname, attribute, new value)
+         */
+    }
+    private static void promptUpdateAllArtistAttributes(String nickname){
+        String newFirstName = getInputFor("new first name");
+        String newLastName = getInputFor("new last name");
+        String newBio = getInputFor("new bio");
+        /*
+        API CALL FOR UPDATING ALL ATTRIBUTES (nickname, firstName, lastName, bio)
+         */
+    }
+    private static void promptUpdateArtist(){
+        System.out.println("[UPDATE ARTIST]\n Please enter the nickname of the artist you want to update.");
+
+        String nickname = getInputFor("nickname");
+        String choices = "";
+        choices += ("Which attribute do you want to update for " + nickname + "?");
+        choices += ("\t 1. First name\n");
+        choices += ("\t 2. Last name\n");
+        choices += ("\t 3. Bio\n");
+        choices += ("\t 4. All attributes\n");
+        choices += ("\t 5. ↵ ARTISTS menu");
+        int choice = loopMenu(choices, 1,5);
+        switch(choice){
+            case 1:
+                promptUpdateSingleArtistAttribute(nickname, "First name");
+                break;
+            case 2:
+                promptUpdateSingleArtistAttribute(nickname, "Last name");
+                break;
+            case 3:
+                promptUpdateSingleArtistAttribute(nickname, "Bio");
+                break;
+            case 4:
+                promptUpdateAllArtistAttributes(nickname);
+                break;
+            case 5:
+                manageArtistsMenu();
+                break;
+        }
+    }
+    private static void promptGetArtistDetails(){
+        String nickname = getInputFor("artist nickname");
+        /*
+        API CALL FOR GETTING ARTIST DETAILS OF "nickname"
+         */
+
+    }
     private static void manageArtistsMenu(){
         String choices = "";
-        choices += ("[ARTISTS] ");
+        choices += ("[ARTISTS] Select an option.\n");
+        choices+=("\t 1. Add artist\n");
+        choices+=("\t 2. Delete artist\n");
+        choices+=("\t 3. List all artists\n");
+        choices+=("\t 4. Update an artist\n");
+        choices+=("\t 5. Get artist details\n");
+        choices+=("\t 6. ↵ Main menu\n");
+        int choice = loopMenu(choices, 1,6);
+        switch(choice){
+            case 1:
+                promptAddArtist();
+                manageArtistsMenu();
+                break;
+            case 2:
+                promptDeleteArtist();
+                manageArtistsMenu();
+                break;
+            case 3:
+                listAllArtists();
+                manageArtistsMenu();
+                break;
+            case 4:
+                promptUpdateArtist();
+                manageArtistsMenu();
+                break;
+            case 5:
+                promptGetArtistDetails();
+                manageArtistsMenu();
+                break;
+            case 6:
+                mainMenu();
+                break;
+        }
     }
     /**
      * Main method.
