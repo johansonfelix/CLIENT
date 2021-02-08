@@ -1,10 +1,23 @@
 package com.clients;
 
+import com.sun.security.ntlm.Server;
+import org.apache.http.Header;
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.methods.*;
+import org.json.*;
+import org.apache.http.client.ClientProtocolException;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.util.EntityUtils;
 import org.glassfish.grizzly.http.server.HttpServer;
+import org.glassfish.grizzly.http.server.Request;
 import org.glassfish.jersey.grizzly2.httpserver.GrizzlyHttpServerFactory;
 import org.glassfish.jersey.server.ResourceConfig;
 
+import javax.ws.rs.core.MediaType;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.util.Scanner;
 
@@ -13,7 +26,18 @@ import java.util.Scanner;
  *
  */
 public class Main {
-
+    private static String RESTPath = "http://localhost:8080/myapp/album/";
+    private static String servletPath = "http://localhost:8081/myapp/artist/"; // RENAME THIS
+    public enum ServerType{
+        REST,
+        Servlet
+    }
+    public enum RequestType{
+        GET,
+        POST,
+        PUT,
+        DELETE
+    }
 
     private static void printWelcomeMessage(){
         System.out.println("Welcome to the A1 RESTful web service.");
@@ -32,6 +56,66 @@ public class Main {
             }
         }
         return choice;
+    }
+
+    private static String httpRequest(ServerType type, RequestType requestType, String contentType, String path, String data){
+
+        String beginningPath = "";
+        switch(type){
+            case REST:
+                beginningPath = RESTPath;
+                break;
+            case Servlet:
+                beginningPath = servletPath;
+                break;
+        }
+        HttpResponse response = null;
+        final DefaultHttpClient httpClient = new DefaultHttpClient();
+        String fullPath = beginningPath + path;
+        HttpUriRequest request = null;
+        switch(requestType){
+            case POST:
+                request = new HttpPost(fullPath);
+                break;
+            case GET:
+                request = new HttpGet(fullPath);
+                break;
+            case PUT:
+                request = new HttpPut(fullPath);
+                break;
+            case DELETE:
+                request = new HttpDelete(fullPath);
+                break;
+        }
+        StringEntity input = null;
+        try {
+            if(request instanceof HttpPost || request instanceof HttpPut){
+                input = new StringEntity(data);
+                input.setContentType(contentType);
+                if(request instanceof HttpPost){
+                    ((HttpPost) request).setEntity(input);
+                }
+                else if(request instanceof HttpPut){
+                    ((HttpPut) request).setEntity(input);
+                }
+            }
+            try {
+                response = httpClient.execute(request);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+        try {
+            HttpEntity entity = response.getEntity();
+            String responseString = null;
+            responseString = EntityUtils.toString(entity, "UTF-8");
+            return responseString;
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return response.toString();
     }
     private static void mainMenu(){
 
@@ -65,6 +149,7 @@ public class Main {
         /*
         Use ISRC input to get the album details, send HTTP request.
          */
+        System.out.println(httpRequest(ServerType.REST, RequestType.GET, null, "get-details/" + ISRC, null));
         manageAlbumsMenu();
     }
     private static String promptUpdateSingleAlbumAttribute(String ISRC, String attribute){
@@ -73,6 +158,11 @@ public class Main {
         /*
         API call, get the string. Use a switch statement to determine which attribute to change.
          */
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("attribute",attribute);
+        jsonObject.put("newValue",newValue);
+        String data = jsonObject.toString();
+        System.out.println(httpRequest(ServerType.REST, RequestType.PUT, MediaType.APPLICATION_JSON, "update-single-attribute/" + ISRC, data));
         return result;
     }
     private static String promptUpdateAllAlbumAttributes(String ISRC){
@@ -84,6 +174,13 @@ public class Main {
         /*
         API call, get the string.
          */
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("newTitle",newTitle);
+        jsonObject.put("newDescription",newDescription);
+        jsonObject.put("newReleaseYear",newReleaseYear);
+        jsonObject.put("newArtistNickname",newArtistNickname);
+        String jsonString = jsonObject.toString();
+        System.out.println(httpRequest(ServerType.REST, RequestType.PUT, MediaType.APPLICATION_JSON, "update-all-attributes/" + ISRC, jsonString));
         return result;
     }
     private static void promptUpdateAlbum(){
@@ -128,12 +225,21 @@ public class Main {
         /*
         API call to list all albums.
          */
+        System.out.println(httpRequest(ServerType.REST, RequestType.GET, null, "get-details-all", null));
     }
     private static void promptDeleteAlbum(){
         String ISRC = getInputFor("ISRC");
         /*
         API call to delete the album.
          */
+        System.out.println(httpRequest(ServerType.REST, RequestType.DELETE, null, "delete/" + ISRC, null));
+    }
+    private static String addTag(String name, String type){
+        if(type.equals("open")){
+            return "<" + name + ">";
+
+        }
+        else return "</" + name + ">";
     }
     private static void promptAddAlbum(){
         String ISRC = getInputFor("ISRC");
@@ -144,6 +250,25 @@ public class Main {
         /*
         API call to add an album.
          */
+        String xml = "";
+        xml += addTag("album", "open");
+        xml += addTag("ISRC", "open");
+        xml += ISRC;
+        xml += addTag("ISRC", "closed");
+        xml += addTag("title","open");
+        xml += title;
+        xml += addTag("title","closed");
+        xml += addTag("description","open");
+        xml += description;
+        xml += addTag("description", "closed");
+        xml += addTag("releaseYear", "open");
+        xml += releaseYear;
+        xml += addTag("releaseYear","closed");
+        xml += addTag("artist","open");
+        xml += artistNickname;
+        xml += addTag("artist","closed");
+        xml += addTag("album","closed");
+        System.out.println(httpRequest(ServerType.REST,RequestType.POST,MediaType.TEXT_XML, "add",xml));
     }
     private static void manageAlbumsMenu(){
 
