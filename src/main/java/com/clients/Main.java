@@ -189,7 +189,7 @@ public class Main {
         System.out.println("[UPDATE ALBUM]\n Please enter the ISRC of the album you want to update.");
         String ISRC = getInputFor("ISRC");
         String choices = "";
-        choices += ("Which attribute do you want to update?");
+        choices += ("Which attribute do you want to update?\n");
         choices += ("\t 1. Title\n");
         choices += ("\t 2. Description\n");
         choices += ("\t 3. Release year\n");
