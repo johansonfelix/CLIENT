@@ -15,6 +15,7 @@ import org.glassfish.grizzly.http.server.Request;
 import org.glassfish.jersey.grizzly2.httpserver.GrizzlyHttpServerFactory;
 import org.glassfish.jersey.server.ResourceConfig;
 
+import javax.print.attribute.standard.Media;
 import javax.ws.rs.core.MediaType;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -27,7 +28,7 @@ import java.util.Scanner;
  */
 public class Main {
     private static String RESTPath = "http://localhost:8080/myapp/album/";
-    private static String servletPath = "http://localhost:8081/myapp/artist/"; // RENAME THIS
+    private static String servletPath = "http://localhost:8081/SERVLET_war/artists"; // RENAME THIS
     public enum ServerType{
         REST,
         Servlet
@@ -94,11 +95,9 @@ public class Main {
                 input.setContentType(contentType);
                 if(request instanceof HttpPost){
                     ((HttpPost) request).setEntity(input);
-                    System.out.println("Is a post request");
                 }
                 else if(request instanceof HttpPut){
                     ((HttpPut) request).setEntity(input);
-                    System.out.println("Is a put request");
                 }
             }
             try {
@@ -317,31 +316,57 @@ public class Main {
         /*
         API CALL FOR ADD ARTIST
          */
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("nickname", nickname);
+        jsonObject.put("firstName",firstName);
+        jsonObject.put("lastName",lastName);
+        jsonObject.put("bio",bio);
+        String jsonString = jsonObject.toString();
+        System.out.println(httpRequest(ServerType.Servlet, RequestType.POST, MediaType.APPLICATION_JSON,"",jsonString));
     }
     private static void promptDeleteArtist(){
         String nickname = getInputFor("nickname of artist to delete");
         /*
         API CALL FOR DELETE ARTIST
          */
+        System.out.println(httpRequest(ServerType.Servlet,RequestType.DELETE, null, "?nickname=" + nickname,null));
+
     }
     private static void listAllArtists(){
         /*
         API CALL FOR LIST ALL ARTISTS
          */
+        System.out.println(httpRequest(ServerType.Servlet,RequestType.GET, null, "?get=all",null));
     }
     private static void promptUpdateSingleArtistAttribute(String nickname, String attribute){
         String newValue = getInputFor("new " + attribute.toLowerCase());
         /*
         API CALL FOR UPDATING A SINGLE ATTRIBUTE func(nickname, attribute, new value)
          */
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("nickname",nickname);
+        jsonObject.put("attribute",attribute);
+        jsonObject.put("newValue",newValue);
+        String jsonString = jsonObject.toString();
+        System.out.println(httpRequest(ServerType.Servlet,RequestType.PUT, MediaType.APPLICATION_JSON, "",jsonString));
+
     }
     private static void promptUpdateAllArtistAttributes(String nickname){
-        String newFirstName = getInputFor("new first name");
-        String newLastName = getInputFor("new last name");
+        String newFirstName = getInputFor("new firstName");
+        String newLastName = getInputFor("new lastName");
         String newBio = getInputFor("new bio");
         /*
         API CALL FOR UPDATING ALL ATTRIBUTES (nickname, firstName, lastName, bio)
          */
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("nickname",nickname);
+        jsonObject.put("attribute","all");
+        jsonObject.put("newFirstName", newFirstName);
+        jsonObject.put("newLastName",newLastName);
+        jsonObject.put("newBio",newBio);
+        String jsonString = jsonObject.toString();
+        System.out.println(httpRequest(ServerType.Servlet, RequestType.PUT, MediaType.APPLICATION_JSON,"",jsonString));
+
     }
     private static void promptUpdateArtist(){
         System.out.println("[UPDATE ARTIST]\n Please enter the nickname of the artist you want to update.");
@@ -357,13 +382,13 @@ public class Main {
         int choice = loopMenu(choices, 1,5);
         switch(choice){
             case 1:
-                promptUpdateSingleArtistAttribute(nickname, "First name");
+                promptUpdateSingleArtistAttribute(nickname, "firstName");
                 break;
             case 2:
-                promptUpdateSingleArtistAttribute(nickname, "Last name");
+                promptUpdateSingleArtistAttribute(nickname, "lastName");
                 break;
             case 3:
-                promptUpdateSingleArtistAttribute(nickname, "Bio");
+                promptUpdateSingleArtistAttribute(nickname, "bio");
                 break;
             case 4:
                 promptUpdateAllArtistAttributes(nickname);
@@ -378,11 +403,12 @@ public class Main {
         /*
         API CALL FOR GETTING ARTIST DETAILS OF "nickname"
          */
+        System.out.println(httpRequest(ServerType.Servlet, RequestType.GET,null,"?get=artist&nickname=" + nickname,null));
 
     }
     private static void manageArtistsMenu(){
         String choices = "";
-        choices += ("[ARTISTS] Select an option.\n");
+        choices += ("[ARTISTS]\n Select an option.\n");
         choices+=("\t 1. Add artist\n");
         choices+=("\t 2. Delete artist\n");
         choices+=("\t 3. List all artists\n");
